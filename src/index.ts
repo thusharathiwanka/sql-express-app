@@ -1,8 +1,6 @@
 import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
-import './db/seed';
-
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
