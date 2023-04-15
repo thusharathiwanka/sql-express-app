@@ -4,12 +4,12 @@
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
-    "prebuild": "npm run copy-files",
+    "prebuild": "npm run copy",
     "build": "rimraf ./dist && npx tsc",
-    "predev": "npm run copy-files",
+    "predev": "npm run copy",
     "dev": "concurrently 'npx tsc --watch' 'npx nodemon ./dist'",
     "start": "node ./dist",
-    "copy-files": "copyfiles -u 1 ./src/**/*.sql ./src/**/*.ejs ./dist"
+    "copy": "copyfiles -u 1 './src/prisma/**/*' './src/views/**/*' ./dist"
   },
   "keywords": [],
   "author": "",
