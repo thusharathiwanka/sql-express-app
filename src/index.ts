@@ -1,21 +1,17 @@
 import express, { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 
 import './db/seed';
-import { pgClient } from './db/client.config';
 
 const app = express();
-const PORT = 5000;
+const prisma = new PrismaClient();
+const PORT = process.env.PORT || 5000;
 
 app.set('view engine', 'ejs');
 app.set('views', `${__dirname}/views`);
 app.use(express.urlencoded({ extended: true }));
 
-pgClient
-  .connect()
-  .then(() =>
-    app.listen(5000, () => console.log(`server running on port ${PORT}`))
-  )
-  .catch((e) => console.log(e));
+app.listen(PORT, () => console.log('server started on port ' + PORT));
 
 app.get('/', (req: Request, res: Response) =>
   res.status(200).json({ message: 'server active' })
@@ -23,8 +19,8 @@ app.get('/', (req: Request, res: Response) =>
 
 app.get('/posts', async (req: Request, res: Response) => {
   try {
-    const result = await pgClient.query('SELECT * FROM posts');
-    res.status(200).render('posts', { posts: result.rows });
+    const result = await prisma.post.findMany();
+    res.status(200).render('posts', { posts: result });
   } catch (error) {
     console.log(error);
     res.status(500).end();
@@ -34,9 +30,18 @@ app.get('/posts', async (req: Request, res: Response) => {
 app.post('/posts', async (req: Request, res: Response) => {
   try {
     const { title, content } = req.body;
-    await pgClient.query(
-      `INSERT INTO posts (title, content) VALUES ('${title}', '${content}');`
-    );
+    await prisma.post.create({ data: { title, content } });
+    res.redirect('/posts');
+  } catch (error) {
+    console.log(error);
+    res.status(500).end();
+  }
+});
+
+app.post('/comments', async (req: Request, res: Response) => {
+  try {
+    const { postId, content } = req.body;
+    await prisma.comment.create({ data: { content, postId: Number(postId) } });
     res.redirect('/posts');
   } catch (error) {
     console.log(error);
